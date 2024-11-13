@@ -22,12 +22,12 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/worksy.git
+   git clone https://github.com/Code-With-Anthony/Worksy.git
    ```
 
 2. Navigate to the client and server directories and install dependencies:
    ```bash
-   cd worksy
+   cd Worksy
    npm install
    ```
 
