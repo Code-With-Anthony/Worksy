@@ -3,7 +3,7 @@ import {
   loginUser,
   registerUser,
   updatedPassword,
-} from "../controllers/auth.js";
+} from "../controllers/Common/authController.js";
 const router = express.Router();
 
 router.route("/register").post(registerUser);

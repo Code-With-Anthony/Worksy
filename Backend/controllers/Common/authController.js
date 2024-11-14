@@ -1,9 +1,7 @@
-import User from "../models/User.js";
-
+import User from "../../models/User.js";
+import Candidate from "../../models/Candidate.js";
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
-
-  console.log("secret key: ", process.env.JWT_SECRET_KEY);
 
   //getting the user from the db
   let user = await User.findOne({
@@ -81,6 +79,15 @@ export const registerUser = async (req, res, next) => {
 
   const newUser = new User({ email, password, role, name });
   await newUser.save();
+
+  // If the user is a candidate, create an entry in the Candidate schema
+  if (role === "Candidate") {
+    const newCandidate = new Candidate({
+      userId: newUser._id,
+      // additional candidate-specific fields can go here
+    });
+    await newCandidate.save();
+  }
 
   res.status(201).json({
     success: true,

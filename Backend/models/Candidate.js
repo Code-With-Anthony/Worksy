@@ -6,7 +6,7 @@ const candidateSchmea = mongoose.Schema({
     required: true,
   },
   resumes: [String],
-  skills: [String],
+  skills: String,
   experience: [
     {
       company: String,
@@ -23,6 +23,14 @@ const candidateSchmea = mongoose.Schema({
       endDate: Date,
     },
   ],
+  certifications: [
+    {
+      name: String,
+      date: Date,
+      certificationAuthority: String,
+    },
+  ],
+  appliedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
 });
 
 const Candidate = mongoose.model("Candidate", candidateSchmea);

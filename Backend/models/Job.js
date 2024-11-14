@@ -21,11 +21,16 @@ const jobSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  skillsRequired: [string],
-  recruiterId: {
+  skillsRequired: [String],
+  company: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Recruiter",
     required: true,
+  },
+  type: {
+    type: String,
+    enum: ["Full-time", "Part-time", "Contract", "Internship"],
+    default: "Full-time",
   },
   applicants: [
     {
