@@ -8,39 +8,30 @@ const recruiterSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
-    companyName: {
-      type: String,
-      required: true,
-      minlength: 3,
-      maxlength: 255,
-      index: true,
-      trim: true, // Removes unnecessary spaces
-    },
     companyDescription: {
       type: String,
-      required: true,
-      minlength: 10,
+      default: "",
       maxlength: 1000,
       trim: true, // Removes unnecessary spaces
       index: true, // Improves searchability
     },
     companyLocation: {
       type: String,
-      required: true,
+      default: "",
     },
     contactEmail: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
       match: [/\S+@\S+\.\S+/, "Invalid email format"], // Validates email format
     },
     phoneNumber: {
       type: String,
-      // required: true,
-      match: [/^\d{10}$/, "Phone number must be 10 digits"], // Validates phone format
+      default: null,
     },
     companyWebsite: {
       type: String,
+      default: "",
       trim: true,
       match: [
         /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
@@ -49,7 +40,6 @@ const recruiterSchema = mongoose.Schema(
     },
     industry: {
       type: String,
-      required: true,
       index: true,
       enum: [
         Industry.TECHNOLOGY,
@@ -59,7 +49,7 @@ const recruiterSchema = mongoose.Schema(
         Industry.RETAIL,
         Industry.OTHER,
       ],
-      default: "Other",
+      default: Industry.OTHER,
     },
     jobsPosted: {
       type: [
