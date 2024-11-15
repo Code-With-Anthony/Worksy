@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-
+import { Roles } from "../constants/Roles.js";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    index: true,
   },
   password: {
     type: String,
@@ -22,8 +23,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["user", "recruiter", "candidate"],
-    default: "user",
+    enum: [Roles.CANDIDATE, Roles.RECRUITER, Roles.USER, Roles.ADMIN],
+    default: Roles.USER,
     required: true,
   },
   createdAt: {
@@ -33,8 +34,14 @@ const userSchema = new mongoose.Schema({
 });
 
 //function to perform some operation before saving the data in db
-userSchema.pre("save", async function () {
+userSchema.pre("save", async function (next) {
+  // Check if the password field was modified
+  if (!this.isModified("password")) {
+    return next(); // Skip hashing if the password was not modified
+  }
+
   this.password = await hashPassword(this.password);
+  next();
 });
 
 //function to hash the password

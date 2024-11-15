@@ -1,7 +1,5 @@
 import express from "express";
 import {
-  registerUser,
-  loginUser,
   getUserProfile,
   updateUserProfile,
   deleteUserAccount,
@@ -12,6 +10,10 @@ import {
   isAdmin,
   isRecruiter,
 } from "../middlewares/authMiddleware.js";
+import {
+  loginUser,
+  registerUser,
+} from "../controllers/Common/authController.js";
 
 const router = express.Router();
 

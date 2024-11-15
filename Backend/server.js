@@ -4,6 +4,9 @@ import cors from "cors";
 import { connectDB } from "./database/connect.js";
 import authRoutes from "./routes/auth.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import candidateRoutes from "./routes/candidateRoutes.js";
+import recruiterRoutes from "./routes/recruiterRoutes.js";
+import { verifyPhoneNumber } from "./controllers/Common/userController.js";
 const app = express();
 
 // Load environment variables from.env file
@@ -14,21 +17,16 @@ app.use(cors());
 
 //auth routes
 app.use("/api/auth", authRoutes);
-app.use("/api/jobs", jobRoutes);
+// app.use("/api/jobs", jobRoutes);
 
 //candidate routes
-// aap.use("/api/candidate/jobs");
-// app.use("api/candidate/jobs/:jobId/apply");
-// app.use("/api/candidate/applied-jobs");
-// app.use("/api/candidate/profile");
+app.use("/api/candidate", candidateRoutes);
 
 //recruiter routes
-// app.use("/api/recruiter/jobs/create");
-// app.use("/api/recruiter/jobs");
-// app.use("/api/recruiter/jobs/:jobId/edit");
-// app.use("/api/recruiter/jobs/:jobId/delete");
-// app.use("/api/recruiter/jobs/:jobId/applicants");
-// app.use("/api/recruiter/profile");
+app.use("/api/recruiter", recruiterRoutes);
+
+//testing phone number route
+app.use("/api/phone", verifyPhoneNumber);
 
 //admin routes
 // app.use("/api/admin/users");

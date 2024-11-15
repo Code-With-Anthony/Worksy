@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import { Roles } from "../../constants/Roles.js";
 import Candidate from "../../models/Candidate.js";
+import { validatePhoneNumber } from "../../utility/validatePhoneNumber.js";
 
 //get user profile
 export const getUserProfile = async (req, res) => {
@@ -110,5 +111,20 @@ export const getAllCandidates = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to fetch candidates", error: error.message });
+  }
+};
+
+export const verifyPhoneNumber = async (req, res) => {
+  const { country, phoneNumber } = req.body;
+  try {
+    const validationResult = validatePhoneNumber(country, phoneNumber);
+    if (!validationResult.valid) {
+      return res.status(400).json({ message: validationResult.message });
+    }
+
+    // Proceed with storing the phone number
+    res.status(200).json({ message: "Phone number is valid." });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

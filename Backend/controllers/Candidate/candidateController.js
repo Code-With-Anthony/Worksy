@@ -1,30 +1,15 @@
 import Job from "../../models/Job.js";
 import Candidate from "../../models/Candidate.js";
 import User from "../../models/User.js";
-
-// 1. Get all jobs with "applied" status for the candidate
-export const getJobsForCandidate = async (req, res) => {
+import bcrypt from "bcrypt";
+import { validatePhoneNumber } from "../../utility/validatePhoneNumber.js";
+// 1. Get all jobs
+export const getAllJobs = async (req, res) => {
   try {
-    // Retrieve all jobs from the database
-    const jobs = await Job.find();
-
-    // Check if the candidate has applied for each job
-    const candidateId = req.user._id;
-    const candidate = await Candidate.findById(candidateId).populate(
-      "appliedJobs"
-    );
-
-    // Mark jobs as applied or not
-    const jobList = jobs.map((job) => ({
-      ...job._doc,
-      applied: candidate.appliedJobs.some((appliedJob) =>
-        appliedJob._id.equals(job._id)
-      ),
-    }));
-
-    res.status(200).json({ success: true, data: jobList });
+    const jobs = await Job.find().populate("recruiter", "companyName");
+    res.status(200).json({ jobs });
   } catch (error) {
-    res.status(500).json({ message: "Failed to retrieve jobs", error });
+    res.status(500).json({ message: "Failed to fetch jobs", error });
   }
 };
 
@@ -78,39 +63,91 @@ export const getAppliedJobs = async (req, res) => {
 
 // 4. Update candidate profile
 export const updateProfile = async (req, res) => {
-  const candidateId = req.user._id;
+  const userId = req.user._id; // Assuming req.user._id is the authenticated user's ID.
   const {
     name,
     email,
     password,
-    resume,
+    personalDetails,
+    resumes,
     education,
     skills,
     experience,
     certifications,
-    personalDetails,
+    projects,
+    totalExperience,
+    socialLinks,
   } = req.body;
 
   try {
-    // Find the candidate and update details
-    const candidate = await User.findById(candidateId);
-    if (!candidate)
-      return res.status(404).json({ message: "Candidate not found" });
+    // Find the user document (User schema)
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Update candidate fields conditionally
-    if (name) candidate.name = name;
-    if (email) candidate.email = email;
-    if (password) candidate.password = password; // Assume hashing done elsewhere
-    if (resume) candidate.resume = resume;
+    // Find the candidate profile (Candidate schema)
+    const candidate = await Candidate.findOne({ userId });
+    if (!candidate)
+      return res.status(404).json({ message: "Candidate profile not found" });
+
+    // Validate phone number if present in personalDetails
+    if (personalDetails?.phoneNumber && personalDetails?.country) {
+      const validationResult = validatePhoneNumber(
+        personalDetails.country,
+        personalDetails.phoneNumber
+      );
+
+      if (!validationResult.valid) {
+        return res.status(400).json({ message: validationResult.message });
+      }
+    }
+
+    // Update User-level fields
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (password) {
+      console.log("i came inside");
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    // Update Candidate-specific fields
+    if (personalDetails) {
+      candidate.personalDetails = {
+        ...candidate.personalDetails,
+        ...personalDetails, // Safely merge with existing details
+      };
+    }
+    if (resumes) candidate.resumes = resumes;
     if (education) candidate.education = education;
     if (skills) candidate.skills = skills;
     if (experience) candidate.experience = experience;
     if (certifications) candidate.certifications = certifications;
-    if (personalDetails) candidate.personalDetails = personalDetails;
-
+    if (projects) candidate.projects = projects;
+    if (totalExperience !== undefined)
+      candidate.totalExperience = totalExperience;
+    if (socialLinks) candidate.socialLinks = socialLinks;
+    // Save both updated User and Candidate documents
+    await user.save();
     await candidate.save();
+
     res.status(200).json({ message: "Profile updated successfully" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to update profile", error });
+  }
+};
+
+//5. Get particular candidate
+export const getCandidate = async (req, res) => {
+  const { candidateId } = req.body;
+
+  try {
+    const candidate = await Candidate.findById(candidateId).populate("userId");
+    if (!candidate)
+      return res.status(404).json({ message: "Candidate not found" });
+
+    res.status(200).json({ candidate });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve candidate", error });
   }
 };

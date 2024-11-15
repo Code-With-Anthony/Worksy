@@ -1,5 +1,8 @@
 import User from "../../models/User.js";
 import Candidate from "../../models/Candidate.js";
+import { Roles } from "../../constants/Roles.js";
+import Recruiter from "../../models/Recruister.js";
+
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -81,13 +84,34 @@ export const registerUser = async (req, res, next) => {
   await newUser.save();
 
   // If the user is a candidate, create an entry in the Candidate schema
-  if (role === "Candidate") {
+  if (role === Roles.CANDIDATE) {
     const newCandidate = new Candidate({
       userId: newUser._id,
-      // additional candidate-specific fields can go here
     });
     await newCandidate.save();
   }
+
+  //if the user is recruiter, create an entry in the Recruiter schema
+  if (role === Roles.RECRUITER) {
+    const newRecruiter = new Recruiter({
+      userId: newUser._id,
+    });
+    await newRecruiter.save();
+  }
+
+  // //if all goes well then create the token
+  // const token = await newUser.createJwt();
+  // newUser = newUser.toObject();
+  // delete newUser.password;
+
+  // res.status(201).json({
+  //   success: true,
+  //   message: "User registered successfully",
+  //   data: {
+  //     user,
+  //     // token,
+  //   },
+  // });
 
   res.status(201).json({
     success: true,
